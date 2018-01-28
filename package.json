@@ -1,0 +1,23 @@
+{
+  "name": "water",
+  "private": true,
+  "version": "0.0.0",
+  "description": "a micro-frontend compiler",
+  "scripts": {
+    "bootstrap": "lerna bootstrap",
+    "clean": "lerna clean --yes"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/waterjs/water.git"
+  },
+  "author": "Zheng Li",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/waterjs/water/issues"
+  },
+  "homepage": "https://github.com/waterjs/water#readme",
+  "workspaces": [
+    "packages/*"
+  ]
+}
