@@ -22,7 +22,7 @@ export default ({ types: t, template }) => {
   `);
 
   const buildJSXElementVariableIdentifier = path =>
-    `${path.node.openingElement.name.name}_${path.node.start}_${path.node.end}`
+    path.scope.generateUidIdentifier(path.node.openingElement.name.name);
 
   const JSXOpeningElementVisitor = {
     JSXAttribute(path, { currentStatement, variableIdentifier }) {
@@ -38,13 +38,13 @@ export default ({ types: t, template }) => {
 
       if (isEventHandlerAttribute(name)) {
         currentStatement.insertBefore(buildEventHandler({
-          VARIABLE_IDENTIFIER: t.identifier(variableIdentifier),
+          VARIABLE_IDENTIFIER: variableIdentifier,
           FUNCTION: t.identifier(toEventHandlerIdentifier(name)),
           HANDLER: attributeValue,
         }));
       } else {
         currentStatement.insertBefore(buildSetAttribute({
-          VARIABLE_IDENTIFIER: t.identifier(variableIdentifier),
+          VARIABLE_IDENTIFIER: variableIdentifier,
           ATTRIBUTE: t.stringLiteral(name),
           VALUE: attributeValue,
         }));
@@ -54,21 +54,22 @@ export default ({ types: t, template }) => {
 
   const JSXElementVisitor = {
     JSXElement(path, { currentStatement, parentIdentifier }) {
-      const tagName = path.node.openingElement.name.name;
+      const openingElement = path.get('openingElement');
+      const tagName = openingElement.get('name').node.name;
       const variableIdentifier = buildJSXElementVariableIdentifier(path);
       currentStatement.insertBefore(buildCreateElement({
-        VARIABLE_IDENTIFIER: t.identifier(variableIdentifier),
+        VARIABLE_IDENTIFIER: variableIdentifier,
         TAG_NAME: t.stringLiteral(tagName),
       }));
       if (parentIdentifier) {
         currentStatement.insertBefore(buildAppendChild({
-          PARENT_NODE: t.identifier(this.parentIdentifier),
-          CHILD_NODE: t.identifier(variableIdentifier),
-        }));        
+          PARENT_NODE: parentIdentifier,
+          CHILD_NODE: variableIdentifier,
+        }));
       }
-      path.get('openingElement').traverse(JSXOpeningElementVisitor, { currentStatement, variableIdentifier });
+      openingElement.traverse(JSXOpeningElementVisitor, { currentStatement, variableIdentifier });
       path.get('children').forEach(childPath => childPath.parentPath.traverse(JSXElementVisitor, { currentStatement, parentIdentifier: variableIdentifier }));
-      path.replaceWith(t.identifier(variableIdentifier));
+      path.replaceWith(variableIdentifier);
     },
   }
 
@@ -76,7 +77,7 @@ export default ({ types: t, template }) => {
     ArrowFunctionExpression(path) {
       const body = path.get('body');
 
-      if (t.isJSXElement(body)) {
+      if (body.isJSXElement()) {
         body.replaceWith(
           t.blockStatement([
             t.returnStatement(path.node.body)
