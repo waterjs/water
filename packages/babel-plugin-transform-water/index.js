@@ -1,4 +1,8 @@
 import JSX from '@babel/plugin-syntax-jsx';
+import {
+  isEventHandlerAttribute,
+  toEventHandlerIdentifier,
+} from './events';
 
 export default ({ types: t, template }) => {
   const buildCreateElement = template(`
@@ -13,16 +17,38 @@ export default ({ types: t, template }) => {
     VARIABLE_IDENTIFIER.setAttribute(ATTRIBUTE, VALUE);
   `);
 
+  const buildEventHandler = template(`
+    VARIABLE_IDENTIFIER.FUNCTION = HANDLER;
+  `);
+
   const buildJSXElementVariableIdentifier = path =>
     `${path.node.openingElement.name.name}_${path.node.start}_${path.node.end}`
 
   const JSXOpeningElementVisitor = {
     JSXAttribute(path, { currentStatement, variableIdentifier }) {
-      currentStatement.insertBefore(buildSetAttribute({
-        VARIABLE_IDENTIFIER: t.identifier(variableIdentifier),
-        ATTRIBUTE: t.stringLiteral(path.node.name.name),
-        VALUE: t.stringLiteral(path.node.value.value)
-      }));
+      let attributeValue;
+      const name = path.node.name.name;
+      const value = path.get('value');
+
+      if (value.isStringLiteral()) {
+        attributeValue = t.stringLiteral(path.node.value.value);
+      } else if (value.isJSXExpressionContainer()) {
+        attributeValue = value.get('expression').node;
+      }
+
+      if (isEventHandlerAttribute(name)) {
+        currentStatement.insertBefore(buildEventHandler({
+          VARIABLE_IDENTIFIER: t.identifier(variableIdentifier),
+          FUNCTION: t.identifier(toEventHandlerIdentifier(name)),
+          HANDLER: attributeValue,
+        }));
+      } else {
+        currentStatement.insertBefore(buildSetAttribute({
+          VARIABLE_IDENTIFIER: t.identifier(variableIdentifier),
+          ATTRIBUTE: t.stringLiteral(name),
+          VALUE: attributeValue,
+        }));
+      }
     },
   }
 
