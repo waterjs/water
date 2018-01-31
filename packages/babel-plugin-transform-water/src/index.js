@@ -3,9 +3,14 @@ import {
   isEventHandlerAttribute,
   toEventHandlerIdentifier,
 } from './events';
+import { isCapitalized } from './helpers';
 
 export default ({ types: t, template }) => {
-  const buildCreateElement = template(`
+  const buildCreateElementByFunction = template(`
+    const VARIABLE_IDENTIFIER = TAG_NAME(ATTRIBUTES);
+  `);
+
+  const buildCreateElementByDOM = template(`
     const VARIABLE_IDENTIFIER = document.createElement(TAG_NAME);
   `);
 
@@ -24,11 +29,11 @@ export default ({ types: t, template }) => {
   const buildJSXElementVariableIdentifier = path =>
     path.scope.generateUidIdentifier(path.node.openingElement.name.name);
 
-  const buildHydrationKey = (variableIdentifier, name) =>
-    `${variableIdentifier}_${name}`;
+  const transformAttributesToObjectProperties = attributes =>
+    attributes.map(attribute => t.objectProperty(t.identifier(attribute.name.name), attribute.value));
 
   const JSXOpeningElementVisitor = {
-    JSXAttribute (path, { currentStatement, variableIdentifier, hydrations }) {
+    JSXAttribute (path, { currentStatement, variableIdentifier }) {
       let attributeValue;
       let hydration;
       const name = path.node.name.name;
@@ -52,7 +57,6 @@ export default ({ types: t, template }) => {
           ATTRIBUTE: t.stringLiteral(name),
           VALUE: attributeValue,
         });
-        hydrations[buildHydrationKey(variableIdentifier, name)] = hydration;
         currentStatement.insertBefore(hydration);
       }
 
@@ -69,21 +73,32 @@ export default ({ types: t, template }) => {
   };
 
   const JSXElementVisitor = {
-    JSXElement (path, { currentStatement, parentIdentifier, hydrations }) {
+    JSXElement (path, { currentStatement, parentIdentifier }) {
       const openingElement = path.get('openingElement');
-      const tagName = openingElement.get('name').node.name;
       const variableIdentifier = buildJSXElementVariableIdentifier(path);
-      currentStatement.insertBefore(buildCreateElement({
-        VARIABLE_IDENTIFIER: variableIdentifier,
-        TAG_NAME: t.stringLiteral(tagName),
-      }));
+      const tagName = openingElement.get('name').node.name;
+
+      if (isCapitalized(tagName)) {
+        currentStatement.insertBefore(buildCreateElementByFunction({
+          VARIABLE_IDENTIFIER: variableIdentifier,
+          TAG_NAME: t.identifier(tagName),
+          ATTRIBUTES: t.objectExpression(transformAttributesToObjectProperties(openingElement.node.attributes)),
+        }));
+      } else {
+        currentStatement.insertBefore(buildCreateElementByDOM({
+          VARIABLE_IDENTIFIER: variableIdentifier,
+          TAG_NAME: t.stringLiteral(tagName),
+        }));
+      }
       if (parentIdentifier) {
         currentStatement.insertBefore(buildAppendChild({
           PARENT_NODE: parentIdentifier,
           CHILD_NODE: variableIdentifier,
         }));
       }
-      openingElement.traverse(JSXOpeningElementVisitor, { currentStatement, variableIdentifier, hydrations });
+      if (!isCapitalized(tagName)) {
+        openingElement.traverse(JSXOpeningElementVisitor, { currentStatement, variableIdentifier });
+      }
       path.get('children').forEach(childPath => childPath.parentPath.traverse(JSXElementVisitor, { currentStatement, parentIdentifier: variableIdentifier }));
       path.replaceWith(variableIdentifier);
     },
@@ -104,8 +119,7 @@ export default ({ types: t, template }) => {
 
     JSXElement (path, state) {
       const currentStatement = path.findParent(parentPath => parentPath.isStatement());
-      const hydrations = {};
-      path.parentPath.traverse(JSXElementVisitor, { currentStatement, hydrations });
+      path.parentPath.traverse(JSXElementVisitor, { currentStatement });
     },
   };
 
