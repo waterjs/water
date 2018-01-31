@@ -1,1 +1,1 @@
-export default target => expect(target.tagName).toBe('DIV');
+export default target => expect(target.tagName).toBe('DIV')

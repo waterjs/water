@@ -1,4 +1,4 @@
 export default () => {
-  const a = <div />;
-  return a;
-};
+  const a = <div />
+  return a
+}

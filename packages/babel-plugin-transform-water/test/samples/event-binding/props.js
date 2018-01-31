@@ -1,3 +1,3 @@
 export default {
-  onClick: jest.fn(),
+  onClick: jest.fn()
 }
