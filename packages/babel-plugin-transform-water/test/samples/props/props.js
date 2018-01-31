@@ -1,4 +1,4 @@
 export default {
   foo: 'foo',
-  bar: 'bar'
-}
+  bar: 'bar',
+};

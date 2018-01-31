@@ -1,4 +1,4 @@
 export default (target, props) => {
-  target.click()
-  expect(props.onClick).toHaveBeenCalled()
-}
+  target.click();
+  expect(props.onClick).toHaveBeenCalled();
+};

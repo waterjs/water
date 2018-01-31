@@ -3,4 +3,4 @@ export default () => (
     <li />
     <li />
   </ul>
-)
+);

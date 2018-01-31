@@ -1,1 +1,1 @@
-export default ({ onClick }) => <button onClick={onClick} />
+export default ({ onClick }) => <button onClick={onClick} />;

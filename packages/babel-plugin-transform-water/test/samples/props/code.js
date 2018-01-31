@@ -1,1 +1,1 @@
-export default ({ foo, bar }) => <div foo={foo} bar={bar} />
+export default ({ foo, bar }) => <div foo={foo} bar={bar} />;

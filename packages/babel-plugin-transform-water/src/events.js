@@ -1,11 +1,11 @@
 export const events = [
-  'click'
-]
+  'click',
+];
 
 export function toEventHandlerIdentifier (attribute) {
-  return attribute.toLocaleLowerCase()
+  return attribute.toLocaleLowerCase();
 }
 
 export function isEventHandlerAttribute (attribute) {
-  return events.includes(attribute.replace(/^on/, '').toLocaleLowerCase())
+  return events.includes(attribute.replace(/^on/, '').toLocaleLowerCase());
 }
