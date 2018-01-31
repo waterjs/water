@@ -5,7 +5,9 @@
   "description": "a micro-frontend compiler",
   "scripts": {
     "bootstrap": "lerna bootstrap",
-    "clean": "lerna clean --yes"
+    "clean": "lerna clean --yes",
+    "test": "lerna run test",
+    "lint": "lerna run lint"
   },
   "repository": {
     "type": "git",
