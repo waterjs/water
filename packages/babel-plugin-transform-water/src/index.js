@@ -14,9 +14,16 @@ export default ({ types: t, template }) => {
     const VARIABLE_IDENTIFIER = document.createElement(TAG_NAME);
   `);
 
-  const buildAppendChild = template(`
-    PARENT_NODE.appendChild(CHILD_NODE);
+  const buildCreateElementsByExpression = template(`
+    const VARIABLE_IDENTIFIER = EXPRESSION;
   `);
+
+  const buildAppendChildren = ({PARENT_NODE, CHILDREN_NODE}, builtinFunctions) => {
+    builtinFunctions.add('_append');
+    return template(`
+      _append(PARENT_NODE, CHILDREN_NODE);
+    `)({ PARENT_NODE, CHILDREN_NODE }); 
+  }
 
   const buildSetAttribute = template(`
     VARIABLE_IDENTIFIER.setAttribute(ATTRIBUTE, VALUE);
@@ -34,9 +41,10 @@ export default ({ types: t, template }) => {
 
   const mainVisitor = {};
 
-  const JSXElement = mainVisitor.JSXElement = function (path, { currentStatement, parentIdentifier }) {
+  const JSXElement = mainVisitor.JSXElement = function (path, state) {
+    const { currentStatement, parentIdentifier, isInExpressionContainer, builtinFunctions } = state;
+    state.isInElement = true;
     const targetStatement = currentStatement || path.findParent(parentPath => parentPath.isStatement());
-
     const openingElement = path.get('openingElement');
     const variableIdentifier = buildJSXElementVariableIdentifier(path);
     const tagName = openingElement.get('name').node.name;
@@ -53,13 +61,13 @@ export default ({ types: t, template }) => {
         TAG_NAME: t.stringLiteral(tagName),
       }));
     }
-    if (parentIdentifier) {
-      targetStatement.insertBefore(buildAppendChild({
+    if (parentIdentifier && !isInExpressionContainer) {
+      targetStatement.insertBefore(buildAppendChildren({
         PARENT_NODE: parentIdentifier,
-        CHILD_NODE: variableIdentifier,
-      }));
+        CHILDREN_NODE: variableIdentifier,
+      }, builtinFunctions));
     }
-    path.traverse(mainVisitor, { parentIdentifier: variableIdentifier, currentStatement: targetStatement });
+    path.traverse(mainVisitor, { parentIdentifier: variableIdentifier, currentStatement: targetStatement, builtinFunctions });
     path.replaceWith(variableIdentifier);
   };
 
@@ -99,7 +107,29 @@ export default ({ types: t, template }) => {
         });
       });
     }
+
+    path.skip();
   };
+
+  mainVisitor.JSXExpressionContainer = {
+    enter (path, state) {
+      state.isInExpressionContainer = true;
+    },
+
+    exit (path, state) {
+      const { currentStatement, parentIdentifier, builtinFunctions } = state;
+      state.isInExpressionContainer = false;
+      const variableIdentifier = path.scope.generateUidIdentifier('block');
+      currentStatement.insertBefore(buildCreateElementsByExpression({
+        VARIABLE_IDENTIFIER: variableIdentifier,
+        EXPRESSION: path.get('expression').node,
+      }));
+      currentStatement.insertBefore(buildAppendChildren({
+        PARENT_NODE: parentIdentifier,
+        CHILDREN_NODE: variableIdentifier,
+      }, builtinFunctions));
+    }
+  }
 
   const topVisitor = {
     ArrowFunctionExpression (path) {
@@ -115,6 +145,19 @@ export default ({ types: t, template }) => {
     },
 
     JSXElement,
+
+    Program: {
+      enter (path, state) {
+        state.builtinFunctions = new Set();
+      },
+
+      exit (path, { builtinFunctions }) {
+        if (builtinFunctions.size) {
+          const waterImportDeclaration = t.importDeclaration([...builtinFunctions].map(f => t.importSpecifier(t.identifier(f), t.identifier(f))), t.stringLiteral('water'));
+          path.unshiftContainer('body', waterImportDeclaration);
+        }
+      }
+    }
   };
 
   return {
