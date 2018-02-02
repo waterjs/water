@@ -10,7 +10,7 @@ describe('parser', () => {
   const setupDOM = code => `
     const { JSDOM } = require('jsdom');
     global.document = (new JSDOM('')).window.document;
-    
+
     ${code}
   `;
 

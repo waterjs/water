@@ -1,3 +1,7 @@
+import capitalize from 'lodash.capitalize';
+
+export { capitalize };
+
 export function isCapitalized (string) {
-  return string[0].toUpperCase() === string[0];
+  return capitalize(string) === string;
 }

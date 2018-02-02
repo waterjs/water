@@ -3,27 +3,34 @@ import {
   isEventHandlerAttribute,
   toEventHandlerIdentifier,
 } from './events';
-import { isCapitalized } from './helpers';
+import {
+  capitalize,
+  isCapitalized,
+} from './helpers';
 
 export default ({ types: t, template }) => {
   const buildCreateElementByFunction = template(`
     const VARIABLE_IDENTIFIER = TAG_NAME(ATTRIBUTES);
   `);
 
-  const buildCreateElementByDOM = template(`
-    const VARIABLE_IDENTIFIER = document.createElement(TAG_NAME);
-  `);
+  const buildCreateElementByDOM = ({BUILDER_NAME, VARIABLE_IDENTIFIER, TAG_NAME}, builtinFunctions) => {
+    builtinFunctions.add('_create');
+    return template(`
+      const BUILDER_NAME = _create(TAG_NAME);
+      const VARIABLE_IDENTIFIER = BUILDER_NAME();
+    `)({ BUILDER_NAME, VARIABLE_IDENTIFIER, TAG_NAME });
+  };
 
   const buildCreateElementsByExpression = template(`
-    const VARIABLE_IDENTIFIER = EXPRESSION;
+    const VARIABLE_IDENTIFIER = (() => EXPRESSION)();
   `);
 
   const buildAppendChildren = ({PARENT_NODE, CHILDREN_NODE}, builtinFunctions) => {
     builtinFunctions.add('_append');
     return template(`
       _append(PARENT_NODE, CHILDREN_NODE);
-    `)({ PARENT_NODE, CHILDREN_NODE }); 
-  }
+    `)({ PARENT_NODE, CHILDREN_NODE });
+  };
 
   const buildSetAttribute = template(`
     VARIABLE_IDENTIFIER.setAttribute(ATTRIBUTE, VALUE);
@@ -39,10 +46,10 @@ export default ({ types: t, template }) => {
   const transformAttributesToObjectProperties = attributes =>
     attributes.map(attribute => t.objectProperty(t.identifier(attribute.name.name), attribute.value));
 
-  const mainVisitor = {};
+  const visitor = {};
 
-  const JSXElement = mainVisitor.JSXElement = function (path, state) {
-    const { currentStatement, parentIdentifier, isInExpressionContainer, builtinFunctions } = state;
+  visitor.JSXElement = function (path, state) {
+    const { currentStatement, parentIdentifier, builtinFunctions } = state;
     state.isInElement = true;
     const targetStatement = currentStatement || path.findParent(parentPath => parentPath.isStatement());
     const openingElement = path.get('openingElement');
@@ -56,22 +63,24 @@ export default ({ types: t, template }) => {
         ATTRIBUTES: t.objectExpression(transformAttributesToObjectProperties(openingElement.node.attributes)),
       }));
     } else {
+      const builderName = path.scope.generateUidIdentifier(capitalize(tagName));
       targetStatement.insertBefore(buildCreateElementByDOM({
         VARIABLE_IDENTIFIER: variableIdentifier,
+        BUILDER_NAME: builderName,
         TAG_NAME: t.stringLiteral(tagName),
-      }));
+      }, builtinFunctions));
     }
-    if (parentIdentifier && !isInExpressionContainer) {
+    if (parentIdentifier) {
       targetStatement.insertBefore(buildAppendChildren({
         PARENT_NODE: parentIdentifier,
         CHILDREN_NODE: variableIdentifier,
       }, builtinFunctions));
     }
-    path.traverse(mainVisitor, { parentIdentifier: variableIdentifier, currentStatement: targetStatement, builtinFunctions });
+    path.traverse(visitor, { parentIdentifier: variableIdentifier, currentStatement: targetStatement, builtinFunctions });
     path.replaceWith(variableIdentifier);
   };
 
-  mainVisitor.JSXAttribute = function (path, { currentStatement, parentIdentifier }) {
+  visitor.JSXAttribute = function (path, { currentStatement, parentIdentifier }) {
     let attributeValue;
     let hydration;
     const name = path.node.name.name;
@@ -111,14 +120,9 @@ export default ({ types: t, template }) => {
     path.skip();
   };
 
-  mainVisitor.JSXExpressionContainer = {
+  visitor.JSXExpressionContainer = {
     enter (path, state) {
-      state.isInExpressionContainer = true;
-    },
-
-    exit (path, state) {
       const { currentStatement, parentIdentifier, builtinFunctions } = state;
-      state.isInExpressionContainer = false;
       const variableIdentifier = path.scope.generateUidIdentifier('block');
       currentStatement.insertBefore(buildCreateElementsByExpression({
         VARIABLE_IDENTIFIER: variableIdentifier,
@@ -128,40 +132,41 @@ export default ({ types: t, template }) => {
         PARENT_NODE: parentIdentifier,
         CHILDREN_NODE: variableIdentifier,
       }, builtinFunctions));
-    }
-  }
-
-  const topVisitor = {
-    ArrowFunctionExpression (path) {
-      const body = path.get('body');
-
-      if (body.isJSXElement()) {
-        body.replaceWith(
-          t.blockStatement([
-            t.returnStatement(path.node.body),
-          ])
-        );
-      }
+      state.currentStatement = null;
+      state.parentIdentifier = null;
     },
 
-    JSXElement,
+    exit (path, state) {
+    },
+  };
 
-    Program: {
-      enter (path, state) {
-        state.builtinFunctions = new Set();
-      },
+  visitor.ArrowFunctionExpression = function (path) {
+    const body = path.get('body');
 
-      exit (path, { builtinFunctions }) {
-        if (builtinFunctions.size) {
-          const waterImportDeclaration = t.importDeclaration([...builtinFunctions].map(f => t.importSpecifier(t.identifier(f), t.identifier(f))), t.stringLiteral('water'));
-          path.unshiftContainer('body', waterImportDeclaration);
-        }
-      }
+    if (body.isJSXElement()) {
+      body.replaceWith(
+        t.blockStatement([
+          t.returnStatement(path.node.body),
+        ])
+      );
     }
+  };
+
+  visitor.Program = {
+    enter (path, state) {
+      state.builtinFunctions = new Set();
+    },
+
+    exit (path, { builtinFunctions }) {
+      if (builtinFunctions.size) {
+        const waterImportDeclaration = t.importDeclaration([...builtinFunctions].map(f => t.importSpecifier(t.identifier(f), t.identifier(f))), t.stringLiteral('water'));
+        path.unshiftContainer('body', waterImportDeclaration);
+      }
+    },
   };
 
   return {
     inherits: JSX,
-    visitor: topVisitor,
+    visitor,
   };
 };
