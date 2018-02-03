@@ -90,6 +90,8 @@ export default ({ types: t, template }) => {
       attributeValue = t.stringLiteral(path.node.value.value);
     } else if (value.isJSXExpressionContainer()) {
       attributeValue = value.get('expression').node;
+    } else if (value.node === null) {
+      attributeValue = t.stringLiteral('true');
     }
 
     if (isEventHandlerAttribute(name)) {
