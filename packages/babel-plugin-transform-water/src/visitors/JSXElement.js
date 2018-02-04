@@ -19,6 +19,7 @@ export default visitor => (path, state) => {
   const tagName = openingElement.get('name').node.name;
 
   if (isCapitalized(tagName)) {
+    state.isInComponent = true;
     targetStatement.insertBefore(
       new CreateElementExpressionBuilder()
         .withVariable(variableIdentifier)
@@ -27,6 +28,7 @@ export default visitor => (path, state) => {
         .build()
     );
   } else {
+    state.isInComponent = false;
     targetStatement.insertBefore(
       new CreateDOMNodeExpressionBuilder()
         .withScope(path.scope)
@@ -43,6 +45,6 @@ export default visitor => (path, state) => {
         .build()
     );
   }
-  path.traverse(visitor, { parentIdentifier: variableIdentifier, currentStatement: targetStatement });
+  path.traverse(visitor, { parentIdentifier: variableIdentifier, currentStatement: targetStatement, isInComponent: state.isInComponent });
   path.replaceWith(variableIdentifier);
 };

@@ -8,7 +8,7 @@ import {
   EventHandlerExpressionBuilder,
 } from '../builders';
 
-export default (path, { currentStatement, parentIdentifier }) => {
+export default (path, { currentStatement, parentIdentifier, isInComponent }) => {
   let attributeValue;
   let hydration;
   const name = path.node.name.name;
@@ -30,7 +30,7 @@ export default (path, { currentStatement, parentIdentifier }) => {
         .withHandler(attributeValue)
         .build()
     );
-  } else {
+  } else if (!isInComponent) {
     hydration = new SetAttributeExpressionBuilder()
       .withCallee(parentIdentifier)
       .withAttribute(t.stringLiteral(name))
