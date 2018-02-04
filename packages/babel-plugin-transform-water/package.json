@@ -1,7 +1,9 @@
 {
   "name": "babel-plugin-transform-water",
   "version": "0.0.0",
+  "main": "./dist/index.js",
   "scripts": {
+    "build": "babel src --out-dir dist",
     "test": "jest",
     "lint": "eslint src test"
   },
@@ -25,6 +27,7 @@
     "require-from-string": "^2.0.1"
   },
   "dependencies": {
+    "@babel/cli": "^7.0.0-beta.39",
     "@babel/plugin-syntax-jsx": "^7.0.0-beta.38",
     "@babel/template": "^7.0.0-beta.39",
     "@babel/types": "^7.0.0-beta.39",

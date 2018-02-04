@@ -4,7 +4,7 @@
 
 "@babel/cli@^7.0.0-beta.39":
   version "7.0.0-beta.39"
-  resolved "https://registry.yarnpkg.com/@babel/cli/-/cli-7.0.0-beta.39.tgz#0764d7ed63880ab322762f1401cc32bb9b4ec006"
+  resolved "http://registry.npm.taobao.org/@babel/cli/download/@babel/cli-7.0.0-beta.39.tgz#0764d7ed63880ab322762f1401cc32bb9b4ec006"
   dependencies:
     commander "^2.8.1"
     convert-source-map "^1.1.0"
