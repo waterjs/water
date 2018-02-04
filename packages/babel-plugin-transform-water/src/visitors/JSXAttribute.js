@@ -11,7 +11,7 @@ import {
 export default (path, { currentStatement, parentIdentifier, isInComponent }) => {
   let attributeValue;
   let hydration;
-  const name = path.node.name.name;
+  let name = path.node.name.name;
   const value = path.get('value');
 
   if (value.isStringLiteral()) {
@@ -20,6 +20,10 @@ export default (path, { currentStatement, parentIdentifier, isInComponent }) => 
     attributeValue = value.get('expression').node;
   } else if (value.node === null) {
     attributeValue = t.stringLiteral('true');
+  }
+
+  if (name === 'className') {
+    name = 'class';
   }
 
   if (isEventHandlerAttribute(name)) {
