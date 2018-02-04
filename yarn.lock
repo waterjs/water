@@ -25,6 +25,14 @@
     esutils "^2.0.2"
     js-tokens "^3.0.0"
 
+"@babel/code-frame@7.0.0-beta.39":
+  version "7.0.0-beta.39"
+  resolved "http://registry.npm.taobao.org/@babel/code-frame/download/@babel/code-frame-7.0.0-beta.39.tgz#91c90bb65207fc5a55128cb54956ded39e850457"
+  dependencies:
+    chalk "^2.0.0"
+    esutils "^2.0.2"
+    js-tokens "^3.0.0"
+
 "@babel/core@^7.0.0-beta.38":
   version "7.0.0-beta.38"
   resolved "https://registry.yarnpkg.com/@babel/core/-/core-7.0.0-beta.38.tgz#f669abfd5ca918a53cfef45eb57d9efd8d8eac5b"
@@ -431,6 +439,15 @@
     babylon "7.0.0-beta.38"
     lodash "^4.2.0"
 
+"@babel/template@^7.0.0-beta.39":
+  version "7.0.0-beta.39"
+  resolved "http://registry.npm.taobao.org/@babel/template/download/@babel/template-7.0.0-beta.39.tgz#98bd7b132d99f73547c473f2862f481ae84981c9"
+  dependencies:
+    "@babel/code-frame" "7.0.0-beta.39"
+    "@babel/types" "7.0.0-beta.39"
+    babylon "7.0.0-beta.39"
+    lodash "^4.2.0"
+
 "@babel/traverse@7.0.0-beta.38":
   version "7.0.0-beta.38"
   resolved "https://registry.yarnpkg.com/@babel/traverse/-/traverse-7.0.0-beta.38.tgz#56462b91753dd5c6faf36e56a77c64077ddb85b8"
@@ -448,6 +465,14 @@
 "@babel/types@7.0.0-beta.38":
   version "7.0.0-beta.38"
   resolved "https://registry.yarnpkg.com/@babel/types/-/types-7.0.0-beta.38.tgz#2ce2443f7dc6ad535a67db4940cbd34e64035a6f"
+  dependencies:
+    esutils "^2.0.2"
+    lodash "^4.2.0"
+    to-fast-properties "^2.0.0"
+
+"@babel/types@7.0.0-beta.39", "@babel/types@^7.0.0-beta.39":
+  version "7.0.0-beta.39"
+  resolved "http://registry.npm.taobao.org/@babel/types/download/@babel/types-7.0.0-beta.39.tgz#2ea0d97efe4781688751edc68cde640d6559938c"
   dependencies:
     esutils "^2.0.2"
     lodash "^4.2.0"
@@ -805,6 +830,10 @@ babel-types@^6.18.0, babel-types@^6.26.0:
 babylon@7.0.0-beta.38:
   version "7.0.0-beta.38"
   resolved "https://registry.yarnpkg.com/babylon/-/babylon-7.0.0-beta.38.tgz#9b3a33e571a47464a2d20cb9dd5a570f00e3f996"
+
+babylon@7.0.0-beta.39:
+  version "7.0.0-beta.39"
+  resolved "http://registry.npm.taobao.org/babylon/download/babylon-7.0.0-beta.39.tgz#512833ea788f6570c6db026d743a7565e58d3aeb"
 
 babylon@^6.18.0:
   version "6.18.0"
