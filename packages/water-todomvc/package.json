@@ -1,0 +1,20 @@
+{
+  "name": "@water/todomvc",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "build": "webpack --config ./webpack.config.js",
+    "start": "http-serve"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.0.0-beta.39",
+    "@babel/preset-env": "^7.0.0-beta.39",
+    "@water/babel-plugin": "0.0.0",
+    "babel-loader": "8.0.0-beta.0",
+    "webpack": "^3.10.0"
+  },
+  "dependencies": {
+    "@water/core": "0.0.0",
+    "http-serve": "^1.0.1"
+  }
+}
