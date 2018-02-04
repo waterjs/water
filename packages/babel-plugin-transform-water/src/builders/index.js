@@ -5,3 +5,4 @@ export { default as AppendChildrenExpressionBuilder } from './AppendChildrenExpr
 export { default as CreateDOMNodeExpressionBuilder } from './CreateDOMNodeExpressionBuilder';
 export { default as CreateElementExpressionBuilder } from './CreateElementExpressionBuilder';
 export { default as CreateBlockExpressionBuilder } from './CreateBlockExpressionBuilder';
+export { default as CreateTextNodeExpressionBuilder } from './CreateTextNodeExpressionBuilder';

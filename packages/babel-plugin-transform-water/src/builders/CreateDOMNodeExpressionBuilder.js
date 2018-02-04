@@ -20,7 +20,7 @@ export default class CreateDOMNodeExpressionBuilder {
 
   build () {
     ImportBuiltinFunctionsDeclarationBuilder.add('_create');
-    const creatorIdentifier = this.scope.generateUidIdentifier(capitalize(this.tagName));
+    const creatorIdentifier = this.scope.generateUidIdentifier(capitalize(this.tagName.value));
     return template(`
       const CREATOR_IDENTIFIER = _create(TAG_NAME);
       const VARIABLE_IDENTIFIER = CREATOR_IDENTIFIER();
