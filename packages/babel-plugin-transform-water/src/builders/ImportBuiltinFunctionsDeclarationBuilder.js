@@ -12,6 +12,6 @@ export default {
   },
 
   build () {
-    return t.importDeclaration([...builtinFunctions].map(f => t.importSpecifier(t.identifier(f), t.identifier(f))), t.stringLiteral('water'));
+    return t.importDeclaration([...builtinFunctions].map(f => t.importSpecifier(t.identifier(f), t.identifier(f))), t.stringLiteral('@water/core'));
   },
 };
