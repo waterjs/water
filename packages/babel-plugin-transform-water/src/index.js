@@ -4,6 +4,7 @@ import {
   Program,
   JSXElement,
   JSXAttribute,
+  JSXSpreadAttribute,
   JSXExpressionContainer,
 } from './visitors';
 
@@ -12,6 +13,7 @@ export default ({ types: t, template }) => {
     ArrowFunctionExpression,
     Program,
     JSXAttribute,
+    JSXSpreadAttribute,
     JSXExpressionContainer,
   };
 

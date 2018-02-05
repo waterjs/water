@@ -1,4 +1,5 @@
 export { default as SetAttributeExpressionBuilder } from './SetAttributeExpressionBuilder';
+export { default as SetSpreadAttributeExpressionBuilder } from './SetSpreadAttributeExpressionBuilder';
 export { default as EventHandlerExpressionBuilder } from './EventHandlerExpressionBuilder';
 export { default as ImportBuiltinFunctionsDeclarationBuilder } from './ImportBuiltinFunctionsDeclarationBuilder';
 export { default as AppendChildrenExpressionBuilder } from './AppendChildrenExpressionBuilder';
