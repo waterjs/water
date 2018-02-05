@@ -16,7 +16,7 @@ describe('parser', () => {
 
   function getAllSamples () {
     // return fs.readdirSync(SAMPLES_PATH).map(name => ({
-    return ['element-text-node'].map(name => ({
+    return ['element-text-node-dynamic'].map(name => ({
       name,
       codePath: resolve(SAMPLES_PATH, name, 'code.js'),
       propsPath: resolve(SAMPLES_PATH, name, 'props.js'),

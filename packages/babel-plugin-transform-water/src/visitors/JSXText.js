@@ -5,6 +5,12 @@ import {
 } from '../builders';
 
 export default (path, { currentStatement, parentIdentifier }) => {
+  const text = path.node.value;
+
+  if (!text.trim()) {
+    return;
+  }
+
   const variableIdentifier = path.scope.generateUidIdentifier('textNode');
 
   currentStatement.insertBefore(
