@@ -6,6 +6,7 @@ import {
   JSXAttribute,
   JSXSpreadAttribute,
   JSXExpressionContainer,
+  JSXText,
 } from './visitors';
 
 export default ({ types: t, template }) => {
@@ -15,6 +16,7 @@ export default ({ types: t, template }) => {
     JSXAttribute,
     JSXSpreadAttribute,
     JSXExpressionContainer,
+    JSXText,
   };
 
   visitor.JSXElement = JSXElement(visitor);

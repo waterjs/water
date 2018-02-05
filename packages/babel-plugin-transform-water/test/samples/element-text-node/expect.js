@@ -1,3 +1,3 @@
 export default target => {
-  expect(target.textContent).toBe('foobar');
+  expect(target.textContent).toBe('foo');
 };
