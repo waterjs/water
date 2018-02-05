@@ -1,5 +1,1 @@
-export default () => (
-  <span>
-    foo
-  </span>
-);
+export default () => <span>foo</span>;

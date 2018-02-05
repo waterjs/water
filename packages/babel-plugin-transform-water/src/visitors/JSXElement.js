@@ -17,6 +17,7 @@ export default visitor => (path, state) => {
   const openingElement = path.get('openingElement');
   const variableIdentifier = buildJSXElementVariableIdentifier(path);
   const tagName = openingElement.get('name').node.name;
+  const attributes = openingElement.node.attributes;
 
   if (isCapitalized(tagName)) {
     state.isInComponent = true;
@@ -24,7 +25,7 @@ export default visitor => (path, state) => {
       new CreateElementExpressionBuilder()
         .withVariable(variableIdentifier)
         .withComponentName(tagName)
-        .withAttributes(openingElement.node.attributes)
+        .withAttributes(attributes)
         .build()
     );
   } else {
@@ -45,6 +46,6 @@ export default visitor => (path, state) => {
         .build()
     );
   }
-  path.traverse(visitor, { parentIdentifier: variableIdentifier, currentStatement: targetStatement, isInComponent: state.isInComponent });
+  path.traverse(visitor, { parentIdentifier: variableIdentifier, currentStatement: targetStatement, isInComponent: state.isInComponent, tagName, attributes });
   path.replaceWith(variableIdentifier);
 };

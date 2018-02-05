@@ -15,8 +15,7 @@ describe('parser', () => {
   `;
 
   function getAllSamples () {
-    // return fs.readdirSync(SAMPLES_PATH).map(name => ({
-    return ['element-text-node-dynamic'].map(name => ({
+    return fs.readdirSync(SAMPLES_PATH).map(name => ({
       name,
       codePath: resolve(SAMPLES_PATH, name, 'code.js'),
       propsPath: resolve(SAMPLES_PATH, name, 'props.js'),
@@ -27,8 +26,11 @@ describe('parser', () => {
   getAllSamples().forEach(({ name, codePath, propsPath, expectPath }) => {
     it(`should parse ${name}`, async () => {
       const input = await fs.readFile(codePath);
-      const { code } = transform(input, { plugins: [ water ], presets: [ '@babel/preset-env' ] });
-      console.log(code);
+      const { code } = transform(input, {
+        plugins: [ water ],
+        presets: [ '@babel/preset-env' ],
+        babelrc: false,
+      });
       const parsed = requireFromString(setupDOM(code));
       const props = await fs.exists(propsPath) ? require(propsPath).default : {};
       return require(expectPath).default(parsed.default(props), props);

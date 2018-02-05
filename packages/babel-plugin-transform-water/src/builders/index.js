@@ -7,3 +7,4 @@ export { default as CreateDOMNodeExpressionBuilder } from './CreateDOMNodeExpres
 export { default as CreateElementExpressionBuilder } from './CreateElementExpressionBuilder';
 export { default as CreateBlockExpressionBuilder } from './CreateBlockExpressionBuilder';
 export { default as CreateTextNodeExpressionBuilder } from './CreateTextNodeExpressionBuilder';
+export { default as ReplaceComponentExpressionBuilder } from './ReplaceComponentExpressionBuilder';

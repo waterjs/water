@@ -6,9 +6,10 @@ import {
 import {
   SetAttributeExpressionBuilder,
   EventHandlerExpressionBuilder,
+  ReplaceComponentExpressionBuilder,
 } from '../builders';
 
-export default (path, { currentStatement, parentIdentifier, isInComponent }) => {
+export default (path, { currentStatement, parentIdentifier, isInComponent, tagName, attributes }) => {
   let attributeValue;
   let hydration;
   let name = path.node.name.name;
@@ -41,15 +42,22 @@ export default (path, { currentStatement, parentIdentifier, isInComponent }) => 
       .withValue(attributeValue)
       .build();
     currentStatement.insertBefore(hydration);
+  } else {
+    hydration = new ReplaceComponentExpressionBuilder()
+      .withComponent(t.identifier(tagName))
+      .withVariable(parentIdentifier)
+      .withAttributes(attributes)
+      .build();
   }
 
   if (value.isJSXExpressionContainer()) {
     const bindings = value.get('expression').scope.bindings;
-
     Object.keys(bindings).forEach(binding => {
-      bindings[binding].constantViolations.forEach(violationPath => {
-        violationPath.insertAfter(hydration);
-      });
+      if (!bindings[binding].constant) {
+        bindings[binding].constantViolations.forEach(violationPath => {
+          violationPath.insertAfter(hydration);
+        });
+      }
     });
   }
 
