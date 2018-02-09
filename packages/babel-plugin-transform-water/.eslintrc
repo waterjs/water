@@ -2,6 +2,7 @@
   extends: ['standard', 'standard-jsx'],
   env: {
     jest: true,
+    browser: true,
   },
   rules: {
     semi: [2, 'always'],

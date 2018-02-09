@@ -8,3 +8,4 @@ export { default as CreateElementExpressionBuilder } from './CreateElementExpres
 export { default as CreateBlockExpressionBuilder } from './CreateBlockExpressionBuilder';
 export { default as CreateTextNodeExpressionBuilder } from './CreateTextNodeExpressionBuilder';
 export { default as ReplaceComponentExpressionBuilder } from './ReplaceComponentExpressionBuilder';
+export { default as SetTextNodeValueExpressionBuilder } from './SetTextNodeValueExpressionBuilder';
