@@ -28,7 +28,13 @@ describe('parser', () => {
       const input = await fs.readFile(codePath);
       const { code } = transform(input, {
         plugins: [ water ],
-        presets: [ '@babel/preset-env' ],
+        presets: [
+          ['@babel/preset-env', {
+            targets: {
+              node: 'current'
+            }
+          }]
+        ],
         babelrc: false,
       });
       const parsed = requireFromString(setupDOM(code));

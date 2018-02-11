@@ -32,7 +32,7 @@ export default class CreateElementExpressionBuilder {
   build () {
     const properties = t.objectExpression(transformAttributesToObjectProperties(this.attributes));
     return template(`
-      const VARIABLE_IDENTIFIER = COMPONENT(PROPERTIES);
+      let VARIABLE_IDENTIFIER = COMPONENT(PROPERTIES);
     `)({
       VARIABLE_IDENTIFIER: this.variable,
       COMPONENT: this.component,
