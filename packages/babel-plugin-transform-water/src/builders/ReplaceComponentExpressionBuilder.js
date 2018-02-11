@@ -13,7 +13,7 @@ const transformAttributesToObjectProperties = attributes =>
     return t.objectProperty(t.identifier(attribute.name.name), value);
   });
 
-export default class UpdateAttributeExpressionBuilder {
+export default class ReplaceComponentExpressionBuilder {
   withComponent (component) {
     this.component = component;
     return this;
@@ -32,7 +32,9 @@ export default class UpdateAttributeExpressionBuilder {
   build () {
     const properties = t.objectExpression(transformAttributesToObjectProperties(this.attributes));
     return template(`
-      VARIABLE.parentNode.replaceChild(COMPONENT(PROPERTIES), VARIABLE);
+      const newChild = COMPONENT(PROPERTIES);
+      VARIABLE.parentNode.replaceChild(newChild, VARIABLE);
+      VARIABLE = newChild;
     `)({
       COMPONENT: this.component,
       VARIABLE: this.variable,
