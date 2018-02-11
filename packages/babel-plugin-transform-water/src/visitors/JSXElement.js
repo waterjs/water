@@ -11,13 +11,30 @@ import {
 const buildJSXElementVariableIdentifier = path =>
   path.scope.generateUidIdentifier(path.node.openingElement.name.name);
 
+const reduceAttributes = attributes => {
+  const attributeNames = new Set();
+  attributes.reverse().forEach(attribute => {
+    if (!attribute.isJSXAttribute()) {
+      return;
+    }
+
+    const attributeName = attribute.get('name').get('name').node;
+    if (attributeNames.has(attributeName)) {
+      attribute.remove();
+    }
+
+    attributeNames.add(attributeName);
+  });
+};
+
 export default visitor => (path, state) => {
   const { currentStatement, parentIdentifier } = state;
   const targetStatement = currentStatement || path.findParent(parentPath => parentPath.isStatement());
   const openingElement = path.get('openingElement');
   const variableIdentifier = buildJSXElementVariableIdentifier(path);
   const tagName = openingElement.get('name').node.name;
-  const attributes = openingElement.node.attributes;
+  const attributes = openingElement.get('attributes');
+  reduceAttributes(attributes);
 
   if (isCapitalized(tagName)) {
     state.isInComponent = true;

@@ -1,17 +1,6 @@
 import * as t from '@babel/types';
 import template from '@babel/template';
-
-const transformAttributesToObjectProperties = attributes =>
-  attributes.map(attribute => {
-    let value;
-
-    if (t.isStringLiteral(attribute.value)) {
-      value = attribute.value;
-    } else if (t.isJSXExpressionContainer(attribute.value)) {
-      value = attribute.value.expression;
-    }
-    return t.objectProperty(t.identifier(attribute.name.name), value);
-  });
+import transformAttributesToObjectProperties from '../utils/transformAttributesToObjectProperties';
 
 export default class CreateElementExpressionBuilder {
   withVariable (variable) {
