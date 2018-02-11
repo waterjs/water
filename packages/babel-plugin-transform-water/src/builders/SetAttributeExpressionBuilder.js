@@ -1,4 +1,5 @@
 import template from '@babel/template';
+import ImportBuiltinFunctionsDeclarationBuilder from './ImportBuiltinFunctionsDeclarationBuilder';
 
 export default class SetAttributeExpressionBuilder {
   withCallee (callee) {
@@ -17,8 +18,9 @@ export default class SetAttributeExpressionBuilder {
   }
 
   build () {
+    ImportBuiltinFunctionsDeclarationBuilder.add('_attr');
     return template(`
-      CALLEE.setAttribute(ATTRIBUTE, VALUE);
+      _attr(CALLEE, ATTRIBUTE, VALUE);
     `)({
       CALLEE: this.callee,
       ATTRIBUTE: this.attribute,
