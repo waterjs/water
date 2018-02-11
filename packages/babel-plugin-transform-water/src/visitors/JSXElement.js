@@ -13,7 +13,7 @@ const buildJSXElementVariableIdentifier = path =>
 
 const reduceAttributes = attributes => {
   const attributeNames = new Set();
-  attributes.reverse().forEach(attribute => {
+  attributes.slice().reverse().forEach(attribute => {
     if (!attribute.isJSXAttribute()) {
       return;
     }
