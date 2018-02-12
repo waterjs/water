@@ -1,9 +1,9 @@
-export default () => {
+export default ({ next }) => {
   let foo = 1;
 
-  setTimeout(() => {
+  next(() => {
     foo = 2;
-  }, 0);
+  });
 
   return <div foo={foo} />;
 };

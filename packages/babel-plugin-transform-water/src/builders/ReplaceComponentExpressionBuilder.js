@@ -1,5 +1,6 @@
 import * as t from '@babel/types';
 import template from '@babel/template';
+import ImportBuiltinFunctionsDeclarationBuilder from './ImportBuiltinFunctionsDeclarationBuilder';
 import transformAttributesToObjectProperties from '../utils/transformAttributesToObjectProperties';
 
 export default class ReplaceComponentExpressionBuilder {
@@ -19,10 +20,11 @@ export default class ReplaceComponentExpressionBuilder {
   }
 
   build () {
+    ImportBuiltinFunctionsDeclarationBuilder.add('_replaceNode');
     const properties = t.objectExpression(transformAttributesToObjectProperties(this.attributes));
     return template(`
       const newChild = COMPONENT(PROPERTIES);
-      VARIABLE.parentNode.replaceChild(newChild, VARIABLE);
+      _replaceNode(newChild, VARIABLE);
       VARIABLE = newChild;
     `)({
       COMPONENT: this.component,

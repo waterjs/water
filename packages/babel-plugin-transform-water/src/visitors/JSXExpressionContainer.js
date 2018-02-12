@@ -3,6 +3,7 @@ import {
   CreateBlockExpressionBuilder,
   CreateTextNodeExpressionBuilder,
   SetTextNodeValueExpressionBuilder,
+  ReplaceBlockExpressionBuilder,
 } from '../builders';
 
 export default {
@@ -12,10 +13,12 @@ export default {
 
     if (!isInAttribute) {
       if (expression.isCallExpression()) {
+        const componentName = path.scope.generateUidIdentifier('Block');
         const variableIdentifier = path.scope.generateUidIdentifier('block');
 
         currentStatement.insertBefore(
           new CreateBlockExpressionBuilder()
+            .withComponentName(componentName)
             .withVariable(variableIdentifier)
             .withExpression(expression.node)
             .build()
@@ -26,6 +29,10 @@ export default {
             .withChildren(variableIdentifier)
             .build()
         );
+        state.hydration = new ReplaceBlockExpressionBuilder()
+          .withComponentName(componentName)
+          .withVariable(variableIdentifier)
+          .build();
         state.currentStatement = null;
         state.parentIdentifier = null;
       } else if (expression.isIdentifier()) {

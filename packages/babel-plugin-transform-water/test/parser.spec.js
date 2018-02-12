@@ -39,7 +39,7 @@ describe('parser', () => {
       });
       const parsed = requireFromString(setupDOM(code));
       const props = await fs.exists(propsPath) ? require(propsPath).default : {};
-      return require(expectPath).default(parsed.default(props), props);
+      require(expectPath).default(parsed.default(props), props);
     });
   });
 });

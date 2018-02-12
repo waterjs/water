@@ -1,14 +1,14 @@
-export default () => {
+export default ({ next }) => {
   let foo = false;
   let bar = false;
 
-  setTimeout(() => {
+  next(() => {
     foo = true;
-  }, 0);
+  });
 
-  setTimeout(() => {
+  next(() => {
     bar = true;
-  }, 5);
+  });
 
   return <div result={foo && bar ? 'truthy' : 'falsy'} />;
 };

@@ -1,11 +1,11 @@
 const Component = ({ foo }) => <div bar={foo} />;
 
-export default () => {
+export default ({ next }) => {
   let state = 'foo';
 
-  setTimeout(() => {
+  next(() => {
     state = 'bar';
-  }, 0);
+  });
 
   return (
     <div>
