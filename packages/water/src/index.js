@@ -1,5 +1,17 @@
-export function _create(tagName) {
-  return () => document.createElement(tagName);
+export function _decorate (render) {
+  const bindings = {};
+  const wrapper = function () {
+    return render.apply(wrapper, arguments)
+  };
+
+  wrapper.bind = (attribute, callback) => {
+    bindings[attribute] = callback;
+  };
+  wrapper.update = (attribute, value) => {
+    bindings[attribute].call(null, value);
+  };
+
+  return wrapper;
 }
 
 export function _append(parentNode, childNodes) {

@@ -4,9 +4,11 @@ export { default as EventHandlerExpressionBuilder } from './EventHandlerExpressi
 export { default as ImportBuiltinFunctionsDeclarationBuilder } from './ImportBuiltinFunctionsDeclarationBuilder';
 export { default as AppendChildrenExpressionBuilder } from './AppendChildrenExpressionBuilder';
 export { default as CreateDOMNodeExpressionBuilder } from './CreateDOMNodeExpressionBuilder';
-export { default as CreateElementExpressionBuilder } from './CreateElementExpressionBuilder';
+export { default as RenderElementExpressionBuilder } from './RenderElementExpressionBuilder';
 export { default as CreateBlockExpressionBuilder } from './CreateBlockExpressionBuilder';
 export { default as CreateTextNodeExpressionBuilder } from './CreateTextNodeExpressionBuilder';
-export { default as ReplaceComponentExpressionBuilder } from './ReplaceComponentExpressionBuilder';
+export { default as UpdateComponentAttributeExpressionBuilder } from './UpdateComponentAttributeExpressionBuilder';
 export { default as ReplaceBlockExpressionBuilder } from './ReplaceBlockExpressionBuilder';
 export { default as SetTextNodeValueExpressionBuilder } from './SetTextNodeValueExpressionBuilder';
+export { default as BindComponentAttributeExpressionBuilder } from './BindComponentAttributeExpressionBuilder';
+export { default as DecorateComponentExpressionBuilder } from './DecorateComponentExpressionBuilder';

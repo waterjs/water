@@ -4,14 +4,31 @@ import {
   CreateTextNodeExpressionBuilder,
   SetTextNodeValueExpressionBuilder,
   ReplaceBlockExpressionBuilder,
+  BindComponentAttributeExpressionBuilder,
 } from '../builders';
 
 export default {
   enter (path, state) {
-    const { currentStatement, parentIdentifier, isInAttribute } = state;
+    const { currentStatement, parentIdentifier, attribute } = state;
     const expression = path.get('expression');
 
-    if (!isInAttribute) {
+    if (attribute) {
+      const func = path.getFunctionParent();
+      const props = func.get('params')[0];
+      let properties = [];
+      if (props && props.isObjectPattern()) {
+        properties = props.get('properties').map(prop => prop.get('key').get('name').node);
+      }
+
+      if (expression.isIdentifier() && properties.includes(expression.get('name').node)) {
+        currentStatement.insertBefore(
+          new BindComponentAttributeExpressionBuilder()
+            .withPropertyName(expression.get('name').node)
+            .withCallback(state.hydration)
+            .build()
+        );
+      }
+    } else {
       if (expression.isCallExpression()) {
         const componentName = path.scope.generateUidIdentifier('Block');
         const variableIdentifier = path.scope.generateUidIdentifier('block');
@@ -65,8 +82,5 @@ export default {
         }
       });
     }
-  },
-
-  exit (path, state) {
   },
 };

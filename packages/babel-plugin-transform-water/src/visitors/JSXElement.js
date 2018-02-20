@@ -2,14 +2,12 @@ import * as t from '@babel/types';
 import {
   AppendChildrenExpressionBuilder,
   CreateDOMNodeExpressionBuilder,
-  CreateElementExpressionBuilder,
+  DecorateComponentExpressionBuilder,
+  RenderElementExpressionBuilder,
 } from '../builders';
 import {
   isCapitalized,
 } from '../helpers';
-
-const buildJSXElementVariableIdentifier = path =>
-  path.scope.generateUidIdentifier(path.node.openingElement.name.name);
 
 const reduceAttributes = attributes => {
   const attributeNames = new Set();
@@ -27,42 +25,55 @@ const reduceAttributes = attributes => {
   });
 };
 
-export default visitor => (path, state) => {
-  const { currentStatement, parentIdentifier } = state;
-  const targetStatement = currentStatement || path.findParent(parentPath => parentPath.isStatement());
-  const openingElement = path.get('openingElement');
-  const variableIdentifier = buildJSXElementVariableIdentifier(path);
-  const tagName = openingElement.get('name').node.name;
-  const attributes = openingElement.get('attributes');
-  reduceAttributes(attributes);
+function decorate (renderFunctionPath) {
+  renderFunctionPath.replaceWith(
+    new DecorateComponentExpressionBuilder()
+      .withRender(renderFunctionPath.node)
+      .build()
+  );
+}
 
-  if (isCapitalized(tagName)) {
-    state.isInComponent = true;
-    targetStatement.insertBefore(
-      new CreateElementExpressionBuilder()
-        .withVariable(variableIdentifier)
-        .withComponentName(tagName)
-        .withAttributes(attributes)
-        .build()
-    );
-  } else {
-    state.isInComponent = false;
-    targetStatement.insertBefore(
-      new CreateDOMNodeExpressionBuilder()
-        .withScope(path.scope)
-        .withTagName(t.stringLiteral(tagName))
-        .withVariable(variableIdentifier)
-        .build()
-    );
-  }
-  if (parentIdentifier) {
-    targetStatement.insertBefore(
-      new AppendChildrenExpressionBuilder()
-        .withParent(parentIdentifier)
-        .withChildren(variableIdentifier)
-        .build()
-    );
-  }
-  path.traverse(visitor, { parentIdentifier: variableIdentifier, currentStatement: targetStatement, isInComponent: state.isInComponent, tagName, attributes });
-  path.replaceWith(variableIdentifier);
-};
+export default visitor => ({
+  enter (path, state) {
+    const { currentStatement, parentIdentifier } = state;
+    const targetStatement = currentStatement || path.getStatementParent();
+    const openingElement = path.get('openingElement');
+    const tagName = openingElement.get('name').node.name;
+    const variableIdentifier = path.scope.generateUidIdentifier(tagName);
+    const attributes = openingElement.get('attributes');
+    let componentName = null;
+
+    reduceAttributes(attributes);
+
+    if (isCapitalized(tagName)) {
+      componentName = tagName;
+      targetStatement.insertBefore(
+        new RenderElementExpressionBuilder()
+          .withComponent(t.identifier(tagName))
+          .withVariable(variableIdentifier)
+          .withAttributes(attributes)
+          .build()
+      );
+    } else {
+      targetStatement.insertBefore(
+        new CreateDOMNodeExpressionBuilder()
+          .withTagName(t.stringLiteral(tagName))
+          .withVariable(variableIdentifier)
+          .build()
+      );
+    }
+    if (parentIdentifier) {
+      targetStatement.insertBefore(
+        new AppendChildrenExpressionBuilder()
+          .withParent(parentIdentifier)
+          .withChildren(variableIdentifier)
+          .build()
+      );
+    }
+    path.traverse(visitor, { parentIdentifier: variableIdentifier, currentStatement: targetStatement, componentName });
+    if (!parentIdentifier) {
+      decorate(path.getFunctionParent());
+    }
+    path.replaceWith(variableIdentifier);
+  },
+});

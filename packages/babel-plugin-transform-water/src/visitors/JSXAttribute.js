@@ -6,12 +6,12 @@ import {
 import {
   SetAttributeExpressionBuilder,
   EventHandlerExpressionBuilder,
-  ReplaceComponentExpressionBuilder,
+  UpdateComponentAttributeExpressionBuilder,
 } from '../builders';
 
 export default {
   enter (path, state) {
-    const { currentStatement, parentIdentifier, isInComponent, tagName, attributes } = state;
+    const { currentStatement, parentIdentifier, componentName } = state;
     let attributeValue;
     let name = path.node.name.name;
     const value = path.get('value');
@@ -36,7 +36,7 @@ export default {
           .withHandler(attributeValue)
           .build()
       );
-    } else if (!isInComponent) {
+    } else if (!componentName) {
       state.hydration = new SetAttributeExpressionBuilder()
         .withCallee(parentIdentifier)
         .withAttribute(t.stringLiteral(name))
@@ -44,17 +44,17 @@ export default {
         .build();
       currentStatement.insertBefore(state.hydration);
     } else {
-      state.hydration = new ReplaceComponentExpressionBuilder()
-        .withComponent(t.identifier(tagName))
-        .withVariable(parentIdentifier)
-        .withAttributes(attributes)
+      state.hydration = new UpdateComponentAttributeExpressionBuilder()
+        .withCallee(t.identifier(componentName))
+        .withAttribute(t.stringLiteral(name))
+        .withValue(attributeValue)
         .build();
     }
 
-    state.isInAttribute = true;
+    state.attribute = name;
   },
 
   exit (path, state) {
-    state.isInAttribute = false;
+    state.attribute = null;
   },
 };

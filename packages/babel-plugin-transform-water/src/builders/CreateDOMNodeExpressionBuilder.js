@@ -1,6 +1,4 @@
 import template from '@babel/template';
-import ImportBuiltinFunctionsDeclarationBuilder from './ImportBuiltinFunctionsDeclarationBuilder';
-import { capitalize } from '../helpers';
 
 export default class CreateDOMNodeExpressionBuilder {
   withTagName (tagName) {
@@ -19,13 +17,9 @@ export default class CreateDOMNodeExpressionBuilder {
   }
 
   build () {
-    ImportBuiltinFunctionsDeclarationBuilder.add('_create');
-    const creatorIdentifier = this.scope.generateUidIdentifier(capitalize(this.tagName.value));
     return template(`
-      const CREATOR_IDENTIFIER = _create(TAG_NAME);
-      const VARIABLE_IDENTIFIER = CREATOR_IDENTIFIER();
+      const VARIABLE_IDENTIFIER = document.createElement(TAG_NAME);
     `)({
-      CREATOR_IDENTIFIER: creatorIdentifier,
       TAG_NAME: this.tagName,
       VARIABLE_IDENTIFIER: this.variable,
     });
