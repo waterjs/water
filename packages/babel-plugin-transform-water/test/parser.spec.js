@@ -19,27 +19,39 @@ describe('parser', () => {
       name,
       codePath: resolve(SAMPLES_PATH, name, 'code.js'),
       propsPath: resolve(SAMPLES_PATH, name, 'props.js'),
+      errorPath: resolve(SAMPLES_PATH, name, 'error.js'),
       expectPath: resolve(SAMPLES_PATH, name, 'expect.js'),
     }));
   }
 
-  getAllSamples().forEach(({ name, codePath, propsPath, expectPath }) => {
+  function transformString(input) {
+    const { code } = transform(input, {
+      plugins: [ water ],
+      presets: [
+        ['@babel/preset-env', {
+          targets: {
+            node: 'current',
+          },
+        }],
+      ],
+      babelrc: false,
+    });
+    console.log(code);
+    return code;
+  }
+
+  getAllSamples().forEach(({ name, codePath, propsPath, expectPath, errorPath }) => {
     it(`should parse ${name}`, async () => {
       const input = await fs.readFile(codePath);
-      const { code } = transform(input, {
-        plugins: [ water ],
-        presets: [
-          ['@babel/preset-env', {
-            targets: {
-              node: 'current',
-            },
-          }],
-        ],
-        babelrc: false,
-      });
-      const parsed = requireFromString(setupDOM(code));
       const props = await fs.exists(propsPath) ? require(propsPath).default : {};
-      require(expectPath).default(parsed.default(props), props);
+      const error = await fs.exists(errorPath) && require(errorPath).default;
+      if (error) {
+        expect(() => transformString(input)).toThrow(error(props));
+      } else {
+        const code = transformString(input);
+        const parsed = requireFromString(setupDOM(code));
+        require(expectPath).default(parsed.default(props), props);
+      }
     });
   });
 });

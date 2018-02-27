@@ -6,6 +6,7 @@ import {
   ReplaceBlockExpressionBuilder,
   BindComponentAttributeExpressionBuilder,
 } from '../builders';
+import { UnsupportedFragmentBody } from '../errors';
 
 export default {
   enter (path, state) {
@@ -29,7 +30,7 @@ export default {
         );
       }
     } else {
-      if (expression.isCallExpression()) {
+      if (expression.isFunctionExpression() || expression.isArrowFunctionExpression()) {
         const componentName = path.scope.generateUidIdentifier('Block');
         const variableIdentifier = path.scope.generateUidIdentifier('block');
 
@@ -37,7 +38,7 @@ export default {
           new CreateBlockExpressionBuilder()
             .withComponentName(componentName)
             .withVariable(variableIdentifier)
-            .withExpression(expression.node)
+            .withExpression(expression)
             .build()
         );
         currentStatement.insertBefore(
@@ -69,6 +70,8 @@ export default {
             .withChildren(variableIdentifier)
             .build(),
         ]);
+      } else {
+        throw new UnsupportedFragmentBody();
       }
     }
 

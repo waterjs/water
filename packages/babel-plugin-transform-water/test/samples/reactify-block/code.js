@@ -16,7 +16,7 @@ export default ({ list, next }) => {
 
   return (
     <ul>
-      { list.filter(FILTERS[filter]).map(item => <li>{ item }</li>) }
+      { ({ list, filter }) => list.filter(FILTERS[filter]).map(item => <li>{ item }</li>) }
     </ul>
   );
 };
